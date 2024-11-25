@@ -20,4 +20,4 @@ These instructions are for those using Intune. For those using Group Policies or
 8. Assign to a test group. This must be a group of Devices, not Users. When you're happy it works, come back to the script and "Add all devices" instead. Click Next.
 9. Click Add
 
-You may now monitor deployment. For some reason, it shows as Failed for me, even though the script does what it needs to successfully. I have not looked further into this.
+You may now monitor deployment. It should end with Success. Normally the Intune Management Extension runs hourly to pick up new scripts. If you have any issues and need to modify the script, I found the instructions at this URL for forcing re-execution handy: https://pariswells.com/blog/intune/how-to-diagnose-issues-with-powershell-scripts-running-in-intune
