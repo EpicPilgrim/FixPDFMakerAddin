@@ -6,7 +6,28 @@ cd "c:\Program Files\Adobe\Acrobat DC\PDFMaker"
 icacls Office /t /q /c /reset
 
 # Recursively change owner first before we remove all permissions
-Set-OwnershipRecursive -path "Office" -owner "Administrators"
+$path = "Office"
+$owner = "Administrators"
+
+# Get ACL and set the owner for the current item
+$ACL = Get-Acl -Path $path
+$User = New-Object System.Security.Principal.Ntaccount($owner)
+$ACL.SetOwner($User)
+Set-Acl -Path $path -AclObject $ACL
+
+# If the item is a directory, recurse into its contents
+if ((Get-Item $path).PSIsContainer) {
+    Get-ChildItem -Path $path -Recurse | ForEach-Object {
+        try {
+            # Apply ownership to each item
+            $itemACL = Get-Acl -Path $_.FullName
+            $itemACL.SetOwner($User)
+            Set-Acl -Path $_.FullName -AclObject $itemACL
+        } catch {
+            Write-Host "Failed to set owner on $_.FullName: $_" -ForegroundColor Red
+        }
+    }
+}
 
 # Now add SYSTEM as only user that can read/write
 $ACL = Get-ACL -Path "Office"
@@ -24,7 +45,28 @@ $ACL | Set-Acl -Path "Office"
 icacls Mail /t /q /c /reset
 
 # Recursively change owner first before we remove all permissions
-Set-OwnershipRecursive -path "Mail" -owner "Administrators"
+$path = "Mail"
+$owner = "Administrators"
+
+# Get ACL and set the owner for the current item
+$ACL = Get-Acl -Path $path
+$User = New-Object System.Security.Principal.Ntaccount($owner)
+$ACL.SetOwner($User)
+Set-Acl -Path $path -AclObject $ACL
+
+# If the item is a directory, recurse into its contents
+if ((Get-Item $path).PSIsContainer) {
+    Get-ChildItem -Path $path -Recurse | ForEach-Object {
+        try {
+            # Apply ownership to each item
+            $itemACL = Get-Acl -Path $_.FullName
+            $itemACL.SetOwner($User)
+            Set-Acl -Path $_.FullName -AclObject $itemACL
+        } catch {
+            Write-Host "Failed to set owner on $_.FullName: $_" -ForegroundColor Red
+        }
+    }
+}
 
 # Now add SYSTEM as only user that can read/write
 $ACL = Get-ACL -Path "Mail"
@@ -37,30 +79,5 @@ $ACL = Get-Acl -Path "Mail"
 $ACL.SetAccessRuleProtection($true,$false)
 $ACL | Set-Acl -Path "Mail"
 
-# Function to recursively set ownership
-function Set-OwnershipRecursive {
-    param (
-        [string]$path,
-        [string]$owner
-    )
-
-    # Get ACL and set the owner for the current item
-    $ACL = Get-Acl -Path $path
-    $User = New-Object System.Security.Principal.Ntaccount($owner)
-    $ACL.SetOwner($User)
-    Set-Acl -Path $path -AclObject $ACL
-
-    # If the item is a directory, recurse into its contents
-    if ((Get-Item $path).PSIsContainer) {
-        Get-ChildItem -Path $path -Recurse | ForEach-Object {
-            try {
-                # Apply ownership to each item
-                $itemACL = Get-Acl -Path $_.FullName
-                $itemACL.SetOwner($User)
-                Set-Acl -Path $_.FullName -AclObject $itemACL
-            } catch {
-                Write-Host "Failed to set owner on $_.FullName: $_" -ForegroundColor Red
-            }
-        }
-    }
-}
+Write-Host "ok"
+Exit 0
